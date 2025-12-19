@@ -15,7 +15,7 @@ public class SailingMath {
         return (int) (-(degrees - 270) * (2048 / 360f));
     }
 
-    private static int cycleOrientation(int orientation) {
+    public static int cycleOrientation(int orientation) {
         if (orientation < 0)
             return (2048 + orientation) % 2048;
 
