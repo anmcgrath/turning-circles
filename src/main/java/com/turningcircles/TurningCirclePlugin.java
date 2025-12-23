@@ -42,6 +42,8 @@ public class TurningCirclePlugin extends Plugin {
 
     // track velocity of the boat
     public double currentSpeed;
+    public int currentTurnDirection;
+    public int lastAngle;
     public double lastSpeed;
     public double currentAcceleration;
     private LocalPoint lastLoc = null;
@@ -93,13 +95,17 @@ public class TurningCirclePlugin extends Plugin {
             var speed = SailingMath.getSpeed(vx, vy);
             var accel = (speed - lastSpeed);
 
+            currentTurnDirection = SailingMath.calculateAngleDirectionBetweenOrientations(
+                    lastAngle, boatEntity.getTargetOrientation(), 0);
+
+            lastAngle = boatEntity.getTargetOrientation();
+
             // help protect against moving chunks with large acceleration
             // don't update speed if really big change
             if (accel < 10) {
                 currentSpeed = speed;
                 lastSpeed = currentSpeed;
                 currentAcceleration = accel;
-
             }
 
         }

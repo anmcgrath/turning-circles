@@ -47,7 +47,8 @@ public class TurningCirclesOverlay extends Overlay {
                 boat.getTargetOrientation(),
                 mouseHeading,
                 boat.getTargetLocation(),
-                plugin.currentSpeed);
+                plugin.currentSpeed,
+                plugin.currentTurnDirection);
 
         g.setColor(config.renderColor());
 
