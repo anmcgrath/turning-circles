@@ -38,14 +38,16 @@ public class TurningCirclesOverlay extends Overlay {
         var boatRect = new Rect(bc.getBoundsX(), bc.getBoundsY(), bc.getBoundsWidth(), bc.getBoundsHeight());
 
         var mouseHeading = plugin.calculateMouseHeading(client, boat.getLocalLocation());
-        if (plugin.vx == 0 && plugin.vy == 0)
+
+        if (plugin.currentSpeed == 0)
             return null;
 
-        var paths = SailingMath.GenerateSteps(
+        var paths = SailingMath.generateSteps(
                 config.nSteps(),
                 boat.getTargetOrientation(),
                 mouseHeading,
-                boat.getTargetLocation(), plugin.vx, plugin.vy);
+                boat.getTargetLocation(),
+                plugin.currentSpeed);
 
         g.setColor(config.renderColor());
 

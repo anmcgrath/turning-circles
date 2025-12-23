@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.WorldEntityDespawned;
 import net.runelite.api.events.WorldEntitySpawned;
@@ -39,11 +38,12 @@ public class TurningCirclePlugin extends Plugin {
     private TurningCirclesOverlay turningCirclesOverlay;
 
     // track boats
-    private Map<Integer, WorldEntity> spawnedEntities = new HashMap<>();
+    private final Map<Integer, WorldEntity> spawnedEntities = new HashMap<>();
 
     // track velocity of the boat
-    public int vx;
-    public int vy;
+    public double currentSpeed;
+    public double lastSpeed;
+    public double currentAcceleration;
     private LocalPoint lastLoc = null;
 
     @Override
@@ -87,9 +87,23 @@ public class TurningCirclePlugin extends Plugin {
 
         var loc = boatEntity.getTargetLocation();
         if (lastLoc != null) {
-            vx = loc.getX() - lastLoc.getX();
-            vy = loc.getY() - lastLoc.getY();
+            var vx = loc.getX() - lastLoc.getX();
+            var vy = loc.getY() - lastLoc.getY();
+
+            var speed = SailingMath.getSpeed(vx, vy);
+            var accel = (speed - lastSpeed);
+
+            // help protect against moving chunks with large acceleration
+            // don't update speed if really big change
+            if (accel < 10) {
+                currentSpeed = speed;
+                lastSpeed = currentSpeed;
+                currentAcceleration = accel;
+
+            }
+
         }
+
         lastLoc = loc;
     }
 
