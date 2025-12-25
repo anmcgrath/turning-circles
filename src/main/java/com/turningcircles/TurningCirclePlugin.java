@@ -7,15 +7,16 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.WorldEntityDespawned;
-import net.runelite.api.events.WorldEntitySpawned;
+import net.runelite.api.events.*;
+import net.runelite.api.gameval.ObjectID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.GameEventManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,10 +36,19 @@ public class TurningCirclePlugin extends Plugin {
     private OverlayManager overlayManager;
 
     @Inject
+    private GameEventManager gameEventManager;
+
+    @Inject
     private TurningCirclesOverlay turningCirclesOverlay;
 
-    // track boats
-    private final Map<Integer, WorldEntity> spawnedEntities = new HashMap<>();
+    @Inject
+    private BoatStatsOverlay boatStatsOverlay;
+
+    @Inject
+    private EventBus eventBus;
+
+    @Inject
+    private BoatManager boatManager;
 
     // track velocity of the boat
     public double currentSpeed;
@@ -48,42 +58,29 @@ public class TurningCirclePlugin extends Plugin {
     public double currentAcceleration;
     private LocalPoint lastLoc = null;
 
+
     @Override
     protected void startUp() throws Exception {
         overlayManager.add(turningCirclesOverlay);
+        overlayManager.add(boatStatsOverlay);
+
+        boatManager.startUp();
+        eventBus.register(boatManager);
+        gameEventManager.simulateGameEvents(boatManager);
     }
 
     @Override
     protected void shutDown() throws Exception {
         overlayManager.remove(turningCirclesOverlay);
-        spawnedEntities.clear();
-    }
+        overlayManager.remove(boatStatsOverlay);
 
-    // Returns the boat world entity if sailing, otherwise null
-    public WorldEntity getBoatEntity() {
-        if (!isOnBoat())
-            return null;
-
-        var playerWvId = client.getLocalPlayer().getWorldView().getId();
-
-        if (spawnedEntities.containsKey(playerWvId)) {
-            return spawnedEntities.get(playerWvId);
-        }
-
-        return null;
-    }
-
-    public boolean isOnBoat() {
-        return client.getVarbitValue(VarbitID.SAILING_BOARDED_BOAT) == 1;
-    }
-
-    public boolean isNavigating() {
-        return client.getTopLevelWorldView().getYellowClickAction() == Constants.CLICK_ACTION_SET_HEADING;
+        eventBus.unregister(boatManager);
+        boatManager.shutDown();
     }
 
     @Subscribe
     public void onGameTick(GameTick e) {
-        var boatEntity = getBoatEntity();
+        var boatEntity = boatManager.getBoatEntity();
         if (boatEntity == null)
             return;
 
@@ -113,17 +110,19 @@ public class TurningCirclePlugin extends Plugin {
         lastLoc = loc;
     }
 
-    @Subscribe
-    public void onWorldEntitySpawned(WorldEntitySpawned e) {
-        // keep track of the world views that a boat is in
-        // when the player's world view id matches then they are on the boat
-        spawnedEntities.put(e.getWorldEntity().getWorldView().getId(), e.getWorldEntity());
-    }
 
     @Subscribe
-    public void onWorldEntityDespawned(WorldEntityDespawned e) {
-        spawnedEntities.remove(e.getWorldEntity().getWorldView().getId(), e.getWorldEntity());
+    public void onAnimationChanged(AnimationChanged e) {
+        var a = e.getActor();
+        Actor a2;
+        if (a instanceof GameObject) {
+            final GameObject go = (GameObject) e.getActor();
+            if (go.getId() == ObjectID.SAILING_BOAT_SAIL_KANDARIN_2X5_CAMPHOR) {
+                log.debug("Anim changed to " + a.getAnimation());
+            }
+        }
     }
+
 
     @Provides
     TurningCirclesConfig provideConfig(ConfigManager configManager) {
