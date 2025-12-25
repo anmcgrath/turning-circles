@@ -28,13 +28,13 @@ public class SailingMathTests {
 
     @Test
     public void calculateOrientationDirectionReturnsCorrectValues() {
-        /*Assert.assertEquals(-1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1536, 0));
+        Assert.assertEquals(-1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1536, 0));
         Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(1536, 0, 0));
         Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(1920, 0, 0));
         Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(512, 1024, 0));
         Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 512, 0));
         Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1024, 0));
-        Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1024, 0));*/
+        Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1024, 0));
         Assert.assertEquals(-1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1024, -1));
     }
 }
