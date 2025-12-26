@@ -39,4 +39,14 @@ public interface TurningCirclesConfig extends Config {
     default boolean hideWhenStopped() {
         return true;
     }
+
+    @ConfigItem(
+            keyName = "showBoatSpeed",
+            name = "Show boat speed/acceleration",
+            description = "Show the current boat speed and acceleration",
+            position = 2
+    )
+    default boolean showBoatSpeed() {
+        return false;
+    }
 }

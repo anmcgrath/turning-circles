@@ -30,15 +30,17 @@ public class BoatStatsOverlay extends Overlay {
         if (!boatManager.isOnBoat)
             return null;
 
-        graphics.drawString("Speed: " + plugin.currentSpeed, 0, 20);
-        graphics.drawString("Acceleration: " + plugin.currentAcceleration, 0, 40);
-        graphics.drawString("Ticks since mote: " + boatManager.ticksSinceCrystalEvent, 0, 80);
-        graphics.drawString("Has crystal mote boost: " + boatManager.isCrystalMoteSpeedBoostActive(), 0, 100);
-        graphics.drawString("Boat max speed: " + boatManager.boatSpeedCap, 0, 120);
-        graphics.drawString("Boat acceleration: " + boatManager.boatAcceleration, 0, 160);
-        graphics.drawString("Speed boost active: " + boatManager.isWindSpeedBoostActive(), 0, 200);
-        graphics.drawString("Actual max speed: " + boatManager.getMaxSpeed(0), 0, 220);
+        if (!config.showBoatSpeed())
+            return null;
 
-        return null;
+        graphics.setColor(Color.YELLOW);
+        graphics.drawString("Speed: " + plugin.currentSpeed, 10, 20);
+        graphics.drawString("Acceleration: " + plugin.currentAcceleration, 10, 40);
+        graphics.setBackground(new Color(0, 0, 0, 20));
+        graphics.setStroke(new BasicStroke(1));
+        graphics.setColor(Color.WHITE);
+        graphics.drawRect(0, 0, 110, 50);
+
+        return new Dimension(100, 50);
     }
 }
