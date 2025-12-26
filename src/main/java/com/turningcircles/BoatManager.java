@@ -65,19 +65,19 @@ public class BoatManager {
     }
 
     /***
-     * Returns true if the crystal mote boost is active for nTicks from now.
+     * Returns true if the crystal boost is active for nTicks from now.
      * @param nTicks the number of ticks from now
      * @return
      */
-    public boolean isCrystalMoteSpeedBoostActive(int nTicks) {
+    public boolean isCrystalSpeedBoostActive(int nTicks) {
         return ticksSinceCrystalEvent >= 0 && ticksSinceCrystalEvent + nTicks <= boostTickDuration;
     }
 
     /***
-     * Returns true if the crystal mote boost is active.
+     * Returns true if the crystal boost is active.
      */
-    public boolean isCrystalMoteSpeedBoostActive() {
-        return isCrystalMoteSpeedBoostActive(0);
+    public boolean isCrystalSpeedBoostActive() {
+        return isCrystalSpeedBoostActive(0);
     }
 
     /***
@@ -110,7 +110,7 @@ public class BoatManager {
         if (isWindSpeedBoostActive(nTicks))
             cappedSpeed = Math.max(cappedSpeed + 0.5, boatSpeedCap);
 
-        if (isCrystalMoteSpeedBoostActive(nTicks)) {
+        if (isCrystalSpeedBoostActive(nTicks)) {
             cappedSpeed += 0.5; // deliberately don't take max with cappedSpeed as I think it's additional
         }
 
