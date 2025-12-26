@@ -1,10 +1,10 @@
 package com.turningcircles;
 
-import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.Point;
 
 public class SailingMath {
     public static int roundToQuarterTile(int offset) {
-        return Math.round(offset / 32f) * 32;
+        return round(offset / 32f) * 32;
     }
 
     public static double orientationToDegrees(int angle) {
@@ -51,5 +51,19 @@ public class SailingMath {
     /// speed in frac of tiles which should be a multiple of 0.5
     public static double getSpeed(int vx, int vy) {
         return Math.round(Math.sqrt(Math.pow(vx / 128f, 2) + Math.pow(vy / 128f, 2)) / 0.5f) * 0.5f;
+    }
+
+    public static int round(double value) {
+        // behave as in +ve numbers - round to the large abs number
+        var rounded = Math.round(Math.abs(value)) * Math.signum(value);
+        return (int) rounded;
+    }
+
+    public static Point getVelocity(double speed, double angle) {
+        var dx = Math.cos(Math.toRadians(angle)) * speed * 128;
+        var dy = Math.sin(Math.toRadians(angle)) * speed * 128;
+        var vx = roundToQuarterTile(round(dx));
+        var vy = roundToQuarterTile(round(dy));
+        return new Point(vx, vy);
     }
 }

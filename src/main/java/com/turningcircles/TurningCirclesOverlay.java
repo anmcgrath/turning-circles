@@ -127,9 +127,8 @@ public class TurningCirclesOverlay extends Overlay {
             orientation = SailingMath.cycleOrientation(orientation);
 
             var angleInDegrees = SailingMath.orientationToDegrees(orientation);
-            var vSx = SailingMath.roundToQuarterTile((int) (Math.cos(Math.toRadians(angleInDegrees)) * speed * 128));
-            var vSy = SailingMath.roundToQuarterTile((int) (Math.sin(Math.toRadians(angleInDegrees)) * speed * 128));
-            pos = new Point(pos.getX() + vSx, pos.getY() + vSy);
+            var v = SailingMath.getVelocity(speed, angleInDegrees);
+            pos = new Point(pos.getX() + v.getX(), pos.getY() + v.getY());
             steps[i] = new BoatStep(pos, orientation);
         }
 
