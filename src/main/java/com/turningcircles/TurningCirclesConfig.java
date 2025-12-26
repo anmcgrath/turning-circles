@@ -29,4 +29,14 @@ public interface TurningCirclesConfig extends Config {
     default Color renderColor() {
         return Color.WHITE;
     }
+
+    @ConfigItem(
+            keyName = "hideWhenStopped",
+            name = "Hide when stopped",
+            description = "Hides the turning circle when the boat is stopped",
+            position = 2
+    )
+    default boolean hideWhenStopped() {
+        return true;
+    }
 }

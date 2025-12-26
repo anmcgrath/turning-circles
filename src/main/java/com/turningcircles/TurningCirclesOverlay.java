@@ -38,6 +38,9 @@ public class TurningCirclesOverlay extends Overlay {
         if (!boatManager.isNavigating())
             return null;
 
+        if (plugin.currentSpeed == 0 && config.hideWhenStopped())
+            return null;
+
         var boat = boatManager.getBoatEntity();
         if (boat == null) return null;
 
