@@ -23,10 +23,10 @@ public class BoatManager {
     // track boats
     private final Map<Integer, WorldEntity> spawnedEntities = new HashMap<>();
 
-    // going over a crystal mote increases your max speed by 0.5 for 50 ticks
-    private final int CRYSTAL_MOTE_TICKS = 50;
-    public int ticksSinceMote = -1;
-    private int lastMoteTick;
+    // going over a crystal event increases your max speed by 0.5
+    public int ticksSinceCrystalEvent = -1;
+    private int lastCrystalEventTick;
+
     public boolean isOnBoat = false;
 
     /// The max speed of the boat without any special considerations
@@ -44,6 +44,9 @@ public class BoatManager {
 
     private static final String SAIL_SPEED_BOOST = "You trim the sails, catching the wind for a burst of speed!";
     private static final String MOTE_SPEED_BOOST = "You release the wind mote for a burst of speed!";
+    private static final String CRYSTAL_MOTE_SPEED_BOOST = "The crystal mote grants both a small burst of speed as well as a wind mote.";
+    private static final String GWENITH_GLIDE_PORTAL_SPEED_BOOST = "The boat is sucked through the portal and sent somewhere else.";
+    private static final String CRYSTALS_REMOVED_SPEED_BOOST = "The crystals have been successfully removed from the helm, granting a burst of speed.";
 
     private int lastWindBoostTick;
     public int ticksSinceLastWindBoost = -1;
@@ -67,7 +70,7 @@ public class BoatManager {
      * @return
      */
     public boolean isCrystalMoteSpeedBoostActive(int nTicks) {
-        return ticksSinceMote >= 0 && ticksSinceMote + nTicks <= CRYSTAL_MOTE_TICKS;
+        return ticksSinceCrystalEvent >= 0 && ticksSinceCrystalEvent + nTicks <= boostTickDuration;
     }
 
     /***
@@ -121,8 +124,8 @@ public class BoatManager {
 
     @Subscribe
     public void onGameTick(GameTick e) {
-        if (lastMoteTick > 0)
-            ticksSinceMote = client.getTickCount() - lastMoteTick;
+        if (lastCrystalEventTick > 0)
+            ticksSinceCrystalEvent = client.getTickCount() - lastCrystalEventTick;
 
         if (lastWindBoostTick > 0)
             ticksSinceLastWindBoost = client.getTickCount() - lastWindBoostTick;
@@ -130,8 +133,10 @@ public class BoatManager {
 
     @Subscribe
     public void onChatMessage(ChatMessage c) {
-        if (c.getMessage().contains("The crystal mote grants")) {
-            lastMoteTick = client.getTickCount();
+        if (c.getMessage().contains(CRYSTAL_MOTE_SPEED_BOOST) ||
+                c.getMessage().contains(GWENITH_GLIDE_PORTAL_SPEED_BOOST) ||
+                c.getMessage().contains(CRYSTALS_REMOVED_SPEED_BOOST)) {
+            lastCrystalEventTick = client.getTickCount();
         }
         if (c.getMessage().equals(SAIL_SPEED_BOOST) || c.getMessage().equals(MOTE_SPEED_BOOST)) {
             lastWindBoostTick = client.getTickCount();
