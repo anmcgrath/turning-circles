@@ -6,10 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.api.WorldEntity;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.WorldEntityDespawned;
-import net.runelite.api.events.WorldEntitySpawned;
+import net.runelite.api.events.*;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.eventbus.Subscribe;
 
@@ -30,11 +27,31 @@ public class BoatManager {
     private final int CRYSTAL_MOTE_TICKS = 50;
     public int ticksSinceMote = -1;
     private int lastMoteTick;
+    public boolean isOnBoat = false;
 
-    protected void startUp(){
+    /// The max speed of the boat without any special considerations
+    public double currentSpeedCap = 0;
+    /// The base speed of the boat when in moveMode 2
+    public double currentBaseSpeed = 0;
+    /// The acceleration the boat is capable of
+    public double currentAcceleration = 0;
+    /// The number of ticks that a speed boost lasts
+    public double boostTickDuration = 0;
+    /// The move mode. 1 = low speed, 2 = full speed, 3 = reverse, 4 = not moving but will move to 2. 0 = not moving.
+    public double moveMode = 0;
+    // Store previous move mode here so we can check which move mode to move to from 0
+    private double lastMoveMode = 2;
+
+    private static final String SAIL_SPEED_BOOST = "You trim the sails, catching the wind for a burst of speed!";
+    private static final String MOTE_SPEED_BOOST = "You release the wind mote for a burst of speed!";
+
+    private int lastWindBoostTick;
+    public int ticksSinceLastWindBoost = -1;
+
+    protected void startUp() {
     }
 
-    protected void shutDown(){
+    protected void shutDown() {
         spawnedEntities.clear();
     }
 
@@ -48,10 +65,36 @@ public class BoatManager {
         return ticksSinceMote >= 0 && ticksSinceMote <= CRYSTAL_MOTE_TICKS;
     }
 
+    public boolean isWindSpeedBoostActive() {
+        return ticksSinceLastWindBoost >= 0 && ticksSinceLastWindBoost <= boostTickDuration;
+    }
+
+    /***
+     * Returns the actual max speed taking into consideration boosts
+     * and move mode.
+     */
+    public double getActualMaxSpeed() {
+        var cappedSpeed = 1.0; // for half-speed
+        if (moveMode == 2 || moveMode == 4 || (moveMode == 0 && lastMoveMode == 4)) {
+            cappedSpeed = currentBaseSpeed;
+        }
+        if (isWindSpeedBoostActive())
+            cappedSpeed = Math.max(cappedSpeed + 0.5, currentSpeedCap);
+
+        if (isCrystalMoteSpeedBoostActive()) {
+            cappedSpeed += 0.5; // deliberately don't take max with cappedSpeed as I think it's additional
+        }
+
+        return cappedSpeed;
+    }
+
     @Subscribe
     public void onGameTick(GameTick e) {
         if (lastMoteTick > 0)
             ticksSinceMote = client.getTickCount() - lastMoteTick;
+
+        if (lastWindBoostTick > 0)
+            ticksSinceLastWindBoost = client.getTickCount() - lastWindBoostTick;
     }
 
     @Subscribe
@@ -59,8 +102,10 @@ public class BoatManager {
         if (c.getMessage().contains("The crystal mote grants")) {
             lastMoteTick = client.getTickCount();
         }
+        if (c.getMessage().equals(SAIL_SPEED_BOOST) || c.getMessage().equals(MOTE_SPEED_BOOST)) {
+            lastWindBoostTick = client.getTickCount();
+        }
     }
-
 
     @Subscribe
     public void onWorldEntitySpawned(WorldEntitySpawned e) {
@@ -74,10 +119,27 @@ public class BoatManager {
         spawnedEntities.remove(e.getWorldEntity().getWorldView().getId(), e.getWorldEntity());
     }
 
+    @Subscribe
+    public void onVarbitChanged(VarbitChanged e) {
+        if (e.getVarbitId() == VarbitID.SAILING_BOARDED_BOAT) {
+            isOnBoat = e.getValue() == 1;
+        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDCAP) {
+            currentSpeedCap = e.getValue() / 128f;
+        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_BASESPEED) {
+            currentBaseSpeed = e.getValue() / 128f;
+        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_ACCELERATION) {
+            currentAcceleration = e.getValue() / 128f;
+        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_MOVE_MODE) {
+            lastMoveMode = moveMode;
+            moveMode = e.getValue();
+        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDBOOST_DURATION) {
+            boostTickDuration = e.getValue();
+        }
+    }
 
     // Returns the boat world entity if sailing, otherwise null
     public WorldEntity getBoatEntity() {
-        if (!isOnBoat())
+        if (!isOnBoat)
             return null;
 
         var playerWvId = client.getLocalPlayer().getWorldView().getId();
@@ -89,10 +151,10 @@ public class BoatManager {
         return null;
     }
 
-    public boolean isOnBoat() {
-        return client.getVarbitValue(VarbitID.SAILING_BOARDED_BOAT) == 1;
-    }
-
+    /***
+     * Whether the player is currently navigating the boat
+     * @return
+     */
     public boolean isNavigating() {
         return client.getTopLevelWorldView().getYellowClickAction() == Constants.CLICK_ACTION_SET_HEADING;
     }
