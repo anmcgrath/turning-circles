@@ -52,26 +52,4 @@ public class SailingMath {
     public static double getSpeed(int vx, int vy) {
         return Math.round(Math.sqrt(Math.pow(vx / 128f, 2) + Math.pow(vy / 128f, 2)) / 0.5f) * 0.5f;
     }
-
-    public static BoatStep[] generateSteps(int nSteps, int fromOrientation, int toOrientation, LocalPoint currentLocation, double currentSpeed, int currentTurnDirection) {
-        // show boat movement preview
-        var steps = new BoatStep[nSteps];
-        var dA = 128;
-        int a = fromOrientation;
-        var dirA = SailingMath.calculateAngleDirectionBetweenOrientations(a, toOrientation, currentTurnDirection);
-        var pos = currentLocation.dx(0).dy(0);
-        for (int i = 0; i < nSteps; i++) {
-            if (a != toOrientation) {
-                a += dA * dirA;
-            }
-            a = SailingMath.cycleOrientation(a);
-            var aDeg = SailingMath.orientationToDegrees(a);
-            var vSx = SailingMath.roundToQuarterTile((int) (Math.cos(Math.toRadians(aDeg)) * currentSpeed * 128));
-            var vSy = SailingMath.roundToQuarterTile((int) (Math.sin(Math.toRadians(aDeg)) * currentSpeed * 128));
-            pos = pos.plus(vSx, vSy);
-            steps[i] = new BoatStep(pos, a);
-        }
-
-        return steps;
-    }
 }

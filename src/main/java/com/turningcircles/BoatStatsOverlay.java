@@ -29,9 +29,13 @@ public class BoatStatsOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         graphics.drawString("Speed: " + plugin.currentSpeed, 0, 20);
         graphics.drawString("Acceleration: " + plugin.currentAcceleration, 0, 40);
-        graphics.drawString("Heading: " + plugin.currentTurnDirection, 0, 60);
         graphics.drawString("Ticks since mote: " + boatManager.ticksSinceMote, 0, 80);
         graphics.drawString("Has crystal mote boost: " + boatManager.isCrystalMoteSpeedBoostActive(), 0, 100);
+        graphics.drawString("Boat max speed: " + boatManager.boatSpeedCap, 0, 120);
+        graphics.drawString("Boat acceleration: " + boatManager.boatAcceleration, 0, 160);
+        graphics.drawString("Speed boost active: " + boatManager.isWindSpeedBoostActive(), 0, 200);
+        graphics.drawString("Actual max speed: " + boatManager.getActualMaxSpeed(), 0, 220);
+
         return null;
     }
 }

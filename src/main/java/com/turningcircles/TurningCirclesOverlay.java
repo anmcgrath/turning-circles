@@ -3,9 +3,8 @@ package com.turningcircles;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.gameval.AnimationID;
-import net.runelite.api.gameval.ObjectID;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -47,21 +46,19 @@ public class TurningCirclesOverlay extends Overlay {
 
         var mouseHeading = plugin.calculateMouseHeading(client, boat.getLocalLocation());
 
-        if (plugin.currentSpeed == 0)
-            return null;
+        //if (plugin.currentSpeed == 0)
+        //    return null;
 
-        var paths = SailingMath.generateSteps(
+        var paths = generateSteps(
                 config.nSteps(),
                 boat.getTargetOrientation(),
-                mouseHeading,
-                boat.getTargetLocation(),
-                plugin.currentSpeed,
-                plugin.currentTurnDirection);
+                mouseHeading);
 
         g.setColor(config.renderColor());
 
         for (var path : paths) {
-            renderRotatedRect(client, g, path.location, boatRect, path.orientation);
+            var newLoc = boat.getTargetLocation().plus(path.offset.getX(), path.offset.getY());
+            renderRotatedRect(client, g, newLoc, boatRect, path.orientation);
         }
 
         return null;
@@ -93,6 +90,42 @@ public class TurningCirclesOverlay extends Overlay {
             canvasPoly.addPoint(cx[i], cy[i]);
         }
         g.draw(canvasPoly);
+    }
+
+
+    public BoatStep[] generateSteps(int nSteps, int fromOrientation, int toOrientation) {
+        // show boat movement preview
+        var steps = new BoatStep[nSteps];
+        var dA = 128;
+        int orientation = fromOrientation;
+
+        // take the max just in case we aren't accounting for something in max speed calculation
+        var maxSpeed = Math.max(boatManager.getActualMaxSpeed(), plugin.currentSpeed);
+
+        var acceleration = boatManager.boatAcceleration;
+        var speed = plugin.currentSpeed;
+
+        var dirA = SailingMath.calculateAngleDirectionBetweenOrientations(orientation, toOrientation, plugin.currentTurnDirection);
+        var pos = new Point(0, 0);
+        for (int i = 0; i < nSteps; i++) {
+
+            if (orientation != toOrientation) {
+                orientation += dA * dirA;
+            }
+
+            speed += acceleration;
+            speed = Math.min(maxSpeed, speed);
+
+            orientation = SailingMath.cycleOrientation(orientation);
+
+            var angleInDegrees = SailingMath.orientationToDegrees(orientation);
+            var vSx = SailingMath.roundToQuarterTile((int) (Math.cos(Math.toRadians(angleInDegrees)) * speed * 128));
+            var vSy = SailingMath.roundToQuarterTile((int) (Math.sin(Math.toRadians(angleInDegrees)) * speed * 128));
+            pos = new Point(pos.getX() + vSx, pos.getY() + vSy);
+            steps[i] = new BoatStep(pos, orientation);
+        }
+
+        return steps;
     }
 
 }

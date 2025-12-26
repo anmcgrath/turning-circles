@@ -1,13 +1,14 @@
 package com.turningcircles;
 
+import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 
 public class BoatStep {
-    public LocalPoint location;
+    public Point offset;
     public int orientation;
 
-    public BoatStep(LocalPoint location, int orientation) {
-        this.location = location;
+    public BoatStep(Point offset, int orientation) {
+        this.offset = offset;
         this.orientation = orientation;
     }
 }

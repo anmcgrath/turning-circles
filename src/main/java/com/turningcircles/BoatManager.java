@@ -30,11 +30,11 @@ public class BoatManager {
     public boolean isOnBoat = false;
 
     /// The max speed of the boat without any special considerations
-    public double currentSpeedCap = 0;
+    public double boatSpeedCap = 0;
     /// The base speed of the boat when in moveMode 2
-    public double currentBaseSpeed = 0;
+    public double boatBaseSpeed = 0;
     /// The acceleration the boat is capable of
-    public double currentAcceleration = 0;
+    public double boatAcceleration = 0;
     /// The number of ticks that a speed boost lasts
     public double boostTickDuration = 0;
     /// The move mode. 1 = low speed, 2 = full speed, 3 = reverse, 4 = not moving but will move to 2. 0 = not moving.
@@ -76,10 +76,10 @@ public class BoatManager {
     public double getActualMaxSpeed() {
         var cappedSpeed = 1.0; // for half-speed
         if (moveMode == 2 || moveMode == 4 || (moveMode == 0 && lastMoveMode == 4)) {
-            cappedSpeed = currentBaseSpeed;
+            cappedSpeed = boatBaseSpeed;
         }
         if (isWindSpeedBoostActive())
-            cappedSpeed = Math.max(cappedSpeed + 0.5, currentSpeedCap);
+            cappedSpeed = Math.max(cappedSpeed + 0.5, boatSpeedCap);
 
         if (isCrystalMoteSpeedBoostActive()) {
             cappedSpeed += 0.5; // deliberately don't take max with cappedSpeed as I think it's additional
@@ -124,11 +124,11 @@ public class BoatManager {
         if (e.getVarbitId() == VarbitID.SAILING_BOARDED_BOAT) {
             isOnBoat = e.getValue() == 1;
         } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDCAP) {
-            currentSpeedCap = e.getValue() / 128f;
+            boatSpeedCap = e.getValue() / 128f;
         } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_BASESPEED) {
-            currentBaseSpeed = e.getValue() / 128f;
+            boatBaseSpeed = e.getValue() / 128f;
         } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_ACCELERATION) {
-            currentAcceleration = e.getValue() / 128f;
+            boatAcceleration = e.getValue() / 128f;
         } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_MOVE_MODE) {
             lastMoveMode = moveMode;
             moveMode = e.getValue();
