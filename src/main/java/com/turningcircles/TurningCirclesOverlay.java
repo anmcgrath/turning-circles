@@ -102,6 +102,11 @@ public class TurningCirclesOverlay extends Overlay {
         var acceleration = boatManager.boatAcceleration;
         var speed = plugin.currentSpeed;
 
+        if (boatManager.isReversing()) {
+            speed *= -1;
+            acceleration *= -1;
+        }
+
         var dirA = SailingMath.calculateAngleDirectionBetweenOrientations(orientation, toOrientation, plugin.currentTurnDirection);
         var pos = new Point(0, 0);
         for (int i = 0; i < nSteps; i++) {
@@ -114,7 +119,7 @@ public class TurningCirclesOverlay extends Overlay {
             }
 
             speed += acceleration;
-            speed = Math.min(maxSpeed, speed);
+            speed = !boatManager.isReversing() ? Math.min(maxSpeed, speed) : Math.max(-maxSpeed, speed);
 
             orientation = SailingMath.cycleOrientation(orientation);
 

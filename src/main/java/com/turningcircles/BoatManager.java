@@ -100,6 +100,9 @@ public class BoatManager {
      * and move mode, nTicks from now. This considers boosts running out.
      */
     public double getMaxSpeed(int nTicks) {
+        if (isReversing())
+            return 0.5;
+
         var cappedSpeed = 1.0; // for half-speed
         if (moveMode == 2 || moveMode == 4 || (moveMode == 0 && lastMoveMode == 4)) {
             cappedSpeed = boatBaseSpeed;
@@ -185,6 +188,10 @@ public class BoatManager {
         }
 
         return null;
+    }
+
+    public boolean isReversing() {
+        return moveMode == 3;
     }
 
     /***

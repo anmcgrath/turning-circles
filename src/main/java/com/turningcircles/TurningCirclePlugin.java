@@ -90,6 +90,7 @@ public class TurningCirclePlugin extends Plugin {
             var vy = loc.getY() - lastLoc.getY();
 
             var speed = SailingMath.getSpeed(vx, vy);
+
             var accel = (speed - lastSpeed);
 
             currentTurnDirection = SailingMath.calculateAngleDirectionBetweenOrientations(

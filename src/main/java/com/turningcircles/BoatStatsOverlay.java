@@ -27,9 +27,12 @@ public class BoatStatsOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
+        if (!boatManager.isOnBoat)
+            return null;
+
         graphics.drawString("Speed: " + plugin.currentSpeed, 0, 20);
         graphics.drawString("Acceleration: " + plugin.currentAcceleration, 0, 40);
-        graphics.drawString("Ticks since mote: " + boatManager.ticksSinceMote, 0, 80);
+        graphics.drawString("Ticks since mote: " + boatManager.ticksSinceCrystalEvent, 0, 80);
         graphics.drawString("Has crystal mote boost: " + boatManager.isCrystalMoteSpeedBoostActive(), 0, 100);
         graphics.drawString("Boat max speed: " + boatManager.boatSpeedCap, 0, 120);
         graphics.drawString("Boat acceleration: " + boatManager.boatAcceleration, 0, 160);
