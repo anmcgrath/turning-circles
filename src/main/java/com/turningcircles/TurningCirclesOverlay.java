@@ -99,15 +99,15 @@ public class TurningCirclesOverlay extends Overlay {
         var dA = 128;
         int orientation = fromOrientation;
 
-        // take the max just in case we aren't accounting for something in max speed calculation
-        var maxSpeed = Math.max(boatManager.getActualMaxSpeed(), plugin.currentSpeed);
-
         var acceleration = boatManager.boatAcceleration;
         var speed = plugin.currentSpeed;
 
         var dirA = SailingMath.calculateAngleDirectionBetweenOrientations(orientation, toOrientation, plugin.currentTurnDirection);
         var pos = new Point(0, 0);
         for (int i = 0; i < nSteps; i++) {
+
+            // take the max just in case we aren't accounting for something in max speed calculation
+            var maxSpeed = Math.max(boatManager.getMaxSpeed(i), plugin.currentSpeed);
 
             if (orientation != toOrientation) {
                 orientation += dA * dirA;

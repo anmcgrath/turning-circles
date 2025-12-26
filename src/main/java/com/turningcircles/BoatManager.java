@@ -61,31 +61,62 @@ public class BoatManager {
         this.config = config;
     }
 
-    public boolean isCrystalMoteSpeedBoostActive() {
-        return ticksSinceMote >= 0 && ticksSinceMote <= CRYSTAL_MOTE_TICKS;
+    /***
+     * Returns true if the crystal mote boost is active for nTicks from now.
+     * @param nTicks the number of ticks from now
+     * @return
+     */
+    public boolean isCrystalMoteSpeedBoostActive(int nTicks) {
+        return ticksSinceMote >= 0 && ticksSinceMote + nTicks <= CRYSTAL_MOTE_TICKS;
     }
 
+    /***
+     * Returns true if the crystal mote boost is active.
+     */
+    public boolean isCrystalMoteSpeedBoostActive() {
+        return isCrystalMoteSpeedBoostActive(0);
+    }
+
+    /***
+     * Returns true if the wind speed boost is active for nTicks from now.
+     * @param nTicks the number of ticks from now
+     */
+    public boolean isWindSpeedBoostActive(int nTicks) {
+        return ticksSinceLastWindBoost >= 0 && ticksSinceLastWindBoost + nTicks <= boostTickDuration;
+    }
+
+    /***
+     * Returns true if the wind speed boost is active
+     */
     public boolean isWindSpeedBoostActive() {
-        return ticksSinceLastWindBoost >= 0 && ticksSinceLastWindBoost <= boostTickDuration;
+        return isWindSpeedBoostActive(0);
+    }
+
+    /***
+     * Returns the actual max speed taking into consideration boosts
+     * and move mode, nTicks from now. This considers boosts running out.
+     */
+    public double getMaxSpeed(int nTicks) {
+        var cappedSpeed = 1.0; // for half-speed
+        if (moveMode == 2 || moveMode == 4 || (moveMode == 0 && lastMoveMode == 4)) {
+            cappedSpeed = boatBaseSpeed;
+        }
+        if (isWindSpeedBoostActive(nTicks))
+            cappedSpeed = Math.max(cappedSpeed + 0.5, boatSpeedCap);
+
+        if (isCrystalMoteSpeedBoostActive(nTicks)) {
+            cappedSpeed += 0.5; // deliberately don't take max with cappedSpeed as I think it's additional
+        }
+
+        return cappedSpeed;
     }
 
     /***
      * Returns the actual max speed taking into consideration boosts
      * and move mode.
      */
-    public double getActualMaxSpeed() {
-        var cappedSpeed = 1.0; // for half-speed
-        if (moveMode == 2 || moveMode == 4 || (moveMode == 0 && lastMoveMode == 4)) {
-            cappedSpeed = boatBaseSpeed;
-        }
-        if (isWindSpeedBoostActive())
-            cappedSpeed = Math.max(cappedSpeed + 0.5, boatSpeedCap);
-
-        if (isCrystalMoteSpeedBoostActive()) {
-            cappedSpeed += 0.5; // deliberately don't take max with cappedSpeed as I think it's additional
-        }
-
-        return cappedSpeed;
+    public double getMaxSpeed() {
+        return getMaxSpeed(0);
     }
 
     @Subscribe

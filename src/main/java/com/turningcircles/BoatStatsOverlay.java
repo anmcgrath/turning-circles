@@ -34,7 +34,7 @@ public class BoatStatsOverlay extends Overlay {
         graphics.drawString("Boat max speed: " + boatManager.boatSpeedCap, 0, 120);
         graphics.drawString("Boat acceleration: " + boatManager.boatAcceleration, 0, 160);
         graphics.drawString("Speed boost active: " + boatManager.isWindSpeedBoostActive(), 0, 200);
-        graphics.drawString("Actual max speed: " + boatManager.getActualMaxSpeed(), 0, 220);
+        graphics.drawString("Actual max speed: " + boatManager.getMaxSpeed(0), 0, 220);
 
         return null;
     }
