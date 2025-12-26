@@ -110,20 +110,6 @@ public class TurningCirclePlugin extends Plugin {
         lastLoc = loc;
     }
 
-
-    @Subscribe
-    public void onAnimationChanged(AnimationChanged e) {
-        var a = e.getActor();
-        Actor a2;
-        if (a instanceof GameObject) {
-            final GameObject go = (GameObject) e.getActor();
-            if (go.getId() == ObjectID.SAILING_BOAT_SAIL_KANDARIN_2X5_CAMPHOR) {
-                log.debug("Anim changed to " + a.getAnimation());
-            }
-        }
-    }
-
-
     @Provides
     TurningCirclesConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(TurningCirclesConfig.class);
