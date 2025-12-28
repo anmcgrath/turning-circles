@@ -17,7 +17,7 @@ public class Rect {
                 centreX + hw,
                 centreX + hw,
                 centreX - hw,
-                centreY - hw
+                centreX - hw
         };
 
         coordsY = new float[]{
