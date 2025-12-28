@@ -37,4 +37,20 @@ public class SailingMathTests {
         Assert.assertEquals(1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1024, 0));
         Assert.assertEquals(-1, SailingMath.calculateAngleDirectionBetweenOrientations(0, 1024, -1));
     }
+
+    @Test
+    public void getSpeedReturnsCorrectValues() {
+        Assert.assertEquals(3.0, SailingMath.getSpeed(-288, -288), 0.001);
+        Assert.assertEquals(3.0, SailingMath.getSpeed(288, 288), 0.001);
+    }
+
+    @Test
+    public void getVelocityReturnsCorrectValues() {
+        Assert.assertEquals(0, SailingMath.getVelocity(0, 0).getX());
+        Assert.assertEquals(0, SailingMath.getVelocity(0, 0).getY());
+        Assert.assertEquals(0, SailingMath.getVelocity(0, 0).getY());
+
+        Assert.assertEquals(-288, SailingMath.getVelocity(3.0, 135).getX());
+        Assert.assertEquals(288, SailingMath.getVelocity(3.0, 135).getY());
+    }
 }
