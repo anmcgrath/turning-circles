@@ -49,9 +49,6 @@ public class TurningCirclesOverlay extends Overlay {
 
         var mouseHeading = plugin.calculateMouseHeading(client, boat.getLocalLocation());
 
-        //if (plugin.currentSpeed == 0)
-        //    return null;
-
         var paths = generateSteps(
                 config.nSteps(),
                 boat.getTargetOrientation(),
@@ -93,6 +90,7 @@ public class TurningCirclesOverlay extends Overlay {
             canvasPoly.addPoint(cx[i], cy[i]);
         }
         g.draw(canvasPoly);
+        //g.fill(canvasPoly);
     }
 
 
