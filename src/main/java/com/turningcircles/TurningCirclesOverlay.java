@@ -8,6 +8,7 @@ import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.util.ColorUtil;
 
 import java.awt.*;
 
@@ -38,7 +39,7 @@ public class TurningCirclesOverlay extends Overlay {
         if (!boatManager.isNavigating())
             return null;
 
-        if (plugin.currentSpeed == 0 && config.hideWhenStopped())
+        if (plugin.currentSpeed == 0 && !config.showWhenStopped())
             return null;
 
         var boat = boatManager.getBoatEntity();
@@ -54,17 +55,28 @@ public class TurningCirclesOverlay extends Overlay {
                 boat.getTargetOrientation(),
                 mouseHeading);
 
-        g.setColor(config.renderColor());
+        var outline = config.renderColor();
+        var bg = config.fillColor();
 
-        for (var path : paths) {
+        for (int i = 0; i < paths.length; i++) {
+            var path = paths[i];
             var newLoc = boat.getTargetLocation().plus(path.offset.getX(), path.offset.getY());
-            renderRotatedRect(client, g, newLoc, boatRect, path.orientation);
+
+            var frac = 1 - (double) i / (double) paths.length;
+
+            if (config.fadeOutlineAlpha())
+                outline = ColorUtil.colorWithAlpha(outline, (int) ((outline.getAlpha() - config.finalOutlineAlpha()) * frac + config.finalOutlineAlpha()));
+
+            if (config.fadeBackgroundAlpha())
+                bg = ColorUtil.colorWithAlpha(bg, (int) ((bg.getAlpha() - config.finalBackgroundAlpha()) * frac + config.finalBackgroundAlpha()));
+
+            renderRotatedRect(client, g, newLoc, boatRect, path.orientation, outline, bg);
         }
 
         return null;
     }
 
-    private void renderRotatedRect(Client client, Graphics2D g, LocalPoint p, Rect r, int angle) {
+    private void renderRotatedRect(Client client, Graphics2D g, LocalPoint p, Rect r, int angle, Color outline, Color fill) {
 
         float[] coordsZ = new float[]{0, 0, 0, 0};
         int[] cx = new int[4];
@@ -89,8 +101,10 @@ public class TurningCirclesOverlay extends Overlay {
         for (int i = 0; i < cx.length; i++) {
             canvasPoly.addPoint(cx[i], cy[i]);
         }
+        g.setColor(outline);
         g.draw(canvasPoly);
-        //g.fill(canvasPoly);
+        g.setColor(fill);
+        g.fill(canvasPoly);
     }
 
 
