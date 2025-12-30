@@ -114,7 +114,7 @@ public class TurningCirclesOverlay extends Overlay {
         var dA = 128;
         int orientation = fromOrientation;
 
-        var acceleration = boatManager.getBoatAcceleration();
+        var acceleration = boatManager.boatAcceleration;
         var speed = plugin.currentSpeed;
 
         if (boatManager.isReversing()) {

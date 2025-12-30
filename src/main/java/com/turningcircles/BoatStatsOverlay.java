@@ -27,7 +27,7 @@ public class BoatStatsOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        if (!boatManager.getIsOnBoat())
+        if (!boatManager.isOnBoat)
             return null;
 
         if (!config.showBoatSpeed())
