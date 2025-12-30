@@ -8,6 +8,7 @@ import net.runelite.api.Constants;
 import net.runelite.api.WorldEntity;
 import net.runelite.api.events.*;
 import net.runelite.api.gameval.VarbitID;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class BoatManager {
 
     private final Client client;
     private final TurningCirclesConfig config;
+    private final ClientThread clientThread;
 
     // track boats
     private final Map<Integer, WorldEntity> spawnedEntities = new HashMap<>();
@@ -52,6 +54,7 @@ public class BoatManager {
     public int ticksSinceLastWindBoost = -1;
 
     protected void startUp() {
+        clientThread.invoke(this::setVarBits);
     }
 
     protected void shutDown() {
@@ -59,9 +62,10 @@ public class BoatManager {
     }
 
     @Inject
-    public BoatManager(Client client, TurningCirclesConfig config) {
+    public BoatManager(Client client, TurningCirclesConfig config, ClientThread clientThread) {
         this.client = client;
         this.config = config;
+        this.clientThread = clientThread;
     }
 
     /***
@@ -174,6 +178,16 @@ public class BoatManager {
         } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDBOOST_DURATION) {
             boostTickDuration = e.getValue();
         }
+    }
+
+    /// set varBits initially
+    private void setVarBits() {
+        isOnBoat = client.getVarbitValue(VarbitID.SAILING_BOARDED_BOAT) == 1;
+        boatSpeedCap = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDCAP) / 128f;
+        boatBaseSpeed = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_BASESPEED) / 128f;
+        boatAcceleration = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_ACCELERATION) / 128f;
+        moveMode = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_MOVE_MODE);
+        boostTickDuration = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDBOOST_DURATION);
     }
 
     // Returns the boat world entity if sailing, otherwise null
