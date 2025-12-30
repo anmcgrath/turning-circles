@@ -27,16 +27,30 @@ public class BoatManager {
     public int ticksSinceCrystalEvent = -1;
     private int lastCrystalEventTick;
 
-    public boolean isOnBoat = false;
+    public boolean getIsOnBoat() {
+        return client.getVarbitValue(VarbitID.SAILING_BOARDED_BOAT) == 1;
+    }
 
     /// The max speed of the boat without any special considerations
-    public double boatSpeedCap = 0;
+    public double getBoatSpeedCap() {
+        return client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDCAP) / 128f;
+    }
+
     /// The base speed of the boat when in moveMode 2
-    public double boatBaseSpeed = 0;
+    public double getBoatBaseSpeed() {
+        return client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_BASESPEED) / 128f;
+    }
+
     /// The acceleration the boat is capable of
-    public double boatAcceleration = 0;
+    public double getBoatAcceleration() {
+        return client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_ACCELERATION) / 128f;
+    }
+
     /// The number of ticks that a speed boost lasts
-    public double boostTickDuration = 0;
+    public double getWindBoostTickDuration() {
+        return client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDBOOST_DURATION);
+    }
+
     /// The move mode. 1 = low speed, 2 = full speed, 3 = reverse, 4 = not moving but will move to 2. 0 = not moving.
     public double moveMode = 0;
     // Store previous move mode here so we can check which move mode to move to from 0
@@ -70,7 +84,7 @@ public class BoatManager {
      * @return
      */
     public boolean isCrystalSpeedBoostActive(int nTicks) {
-        return ticksSinceCrystalEvent >= 0 && ticksSinceCrystalEvent + nTicks <= boostTickDuration;
+        return ticksSinceCrystalEvent >= 0 && ticksSinceCrystalEvent + nTicks <= getWindBoostTickDuration();
     }
 
     /***
@@ -85,7 +99,7 @@ public class BoatManager {
      * @param nTicks the number of ticks from now
      */
     public boolean isWindSpeedBoostActive(int nTicks) {
-        return ticksSinceLastWindBoost >= 0 && ticksSinceLastWindBoost + nTicks <= boostTickDuration;
+        return ticksSinceLastWindBoost >= 0 && ticksSinceLastWindBoost + nTicks <= getWindBoostTickDuration();
     }
 
     /***
@@ -105,10 +119,10 @@ public class BoatManager {
 
         var cappedSpeed = 1.0; // for half-speed
         if (moveMode == 2 || moveMode == 4 || (moveMode == 0 && lastMoveMode == 4)) {
-            cappedSpeed = boatBaseSpeed;
+            cappedSpeed = getBoatBaseSpeed();
         }
         if (isWindSpeedBoostActive(nTicks))
-            cappedSpeed = Math.max(cappedSpeed + 0.5, boatSpeedCap);
+            cappedSpeed = Math.max(cappedSpeed + 0.5, getBoatSpeedCap());
 
         if (isCrystalSpeedBoostActive(nTicks)) {
             cappedSpeed += 0.5; // deliberately don't take max with cappedSpeed as I think it's additional
@@ -160,25 +174,15 @@ public class BoatManager {
 
     @Subscribe
     public void onVarbitChanged(VarbitChanged e) {
-        if (e.getVarbitId() == VarbitID.SAILING_BOARDED_BOAT) {
-            isOnBoat = e.getValue() == 1;
-        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDCAP) {
-            boatSpeedCap = e.getValue() / 128f;
-        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_BASESPEED) {
-            boatBaseSpeed = e.getValue() / 128f;
-        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_ACCELERATION) {
-            boatAcceleration = e.getValue() / 128f;
-        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_MOVE_MODE) {
+        if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_MOVE_MODE) {
             lastMoveMode = moveMode;
             moveMode = e.getValue();
-        } else if (e.getVarbitId() == VarbitID.SAILING_SIDEPANEL_BOAT_SPEEDBOOST_DURATION) {
-            boostTickDuration = e.getValue();
         }
     }
 
     // Returns the boat world entity if sailing, otherwise null
     public WorldEntity getBoatEntity() {
-        if (!isOnBoat)
+        if (!getIsOnBoat())
             return null;
 
         var playerWvId = client.getLocalPlayer().getWorldView().getId();
